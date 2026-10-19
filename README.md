@@ -131,6 +131,11 @@ aktivierbar/deaktivierbar, mit eigenem Hotkey und eigener Einstellungs-View.
 - **Signierung:** Ad-hoc (für eigene Builds via `build.sh`).
 - **Privatsphäre:** 100 % lokal — keine Konten, kein Telemetry, keine Cloud.
 
+## 🪟→🍎 Von Windows gekommen?
+
+Ausgewandert von Windows und vermisst PowerToys, AutoHotkey, EarTrumpet oder WizTree?
+Die [**Windows-Workflow-Migration**](MIGRATION.md) zeigt die macOS-Äquivalente.
+
 ## 🤝 Beitragen
 
 Contributions sind willkommen! Siehe [`CONTRIBUTING.md`](CONTRIBUTING.md).
