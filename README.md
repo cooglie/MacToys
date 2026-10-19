@@ -4,8 +4,10 @@
 
 MacToys ist eine kostenlose, quelloffene Sammlung produktiver macOS-Werkzeuge —
 inspiriert von Microsoft PowerToys, aber von Grund auf nativ für macOS gebaut.
-Fenster-Layouts, Quick Launcher, Power Rename, Color Picker, Text Extractor (OCR),
-Always-on-Top, Image Resizer und mehr — alles in einer leichten, nativen App.
+13 Werkzeuge: Fenster-Layouts, Quick Launcher, Power Rename, Color Picker, Text
+Extractor (OCR), Always-on-Top, Image Resizer, Screen Ruler, Desktop Search,
+Keyboard Tools, Awake, Workspaces und Quick Preview — alles in einer leichten,
+nativen App.
 
 ## Kernprinzipien
 
@@ -16,23 +18,23 @@ Always-on-Top, Image Resizer und mehr — alles in einer leichten, nativen App.
 - **Modular** — nur die Werkzeuge aktivieren, die man braucht.
 - **Community driven** — Issues, Feature Requests, Pull Requests willkommen.
 
-## Geplante Werkzeuge
+## Werkzeuge
 
-| Werkzeug | Status |
-|---|---|
-| Window Manager | ✅ Erster Anker |
-| Quick Launcher | 🚧 geplant |
-| Power Rename | 🚧 geplant |
-| Color Picker | 🚧 geplant |
-| Text Extractor (OCR) | 🚧 geplant |
-| Always on Top | 🚧 geplant |
-| Image Resizer | 🚧 geplant |
-| Screen Ruler | 🚧 geplant |
-| Desktop Search | 🚧 geplant |
-| Keyboard Tools | 🚧 geplant |
-| Awake | 🚧 geplant |
-| Workspaces | 🚧 geplant |
-| Quick Preview | 🚧 geplant |
+| Werkzeug | Beschreibung | Hotkey |
+|---|---|---|
+| Window Manager | Fenster in benutzerdefinierte Layouts ordnen | — |
+| Quick Launcher | Apps starten, rechnen, suchen (schwebende Palette) | ⌘Space |
+| Power Rename | Batch-Umbenennung mit Suche/Ersetzen, Regex, Nummerierung | — |
+| Color Picker | Bildschirmfarben sampeln, HEX/RGB/HSL kopieren | ⌃⌥P |
+| Text Extractor | Text per OCR auswählen (Vision, de+en) | ⌃⌥E |
+| Always on Top | Fenster über allen anderen halten | ⌃⌥T |
+| Image Resizer | Bilder stapelweise skalieren/konvertieren (PNG/JPEG/HEIC) | — |
+| Screen Ruler | Pixel-Messung auf dem Bildschirm | ⌃⌥R |
+| Desktop Search | Dateien via Spotlight finden | — |
+| Keyboard Tools | Tasten-Inspektor + zentrale Hotkey-Übersicht | — |
+| Awake | Automatischen Schlaf verhindern | — |
+| Workspaces | App-Gruppen-Profile starten | — |
+| Quick Preview | Datei-Vorschau via Quick Look | — |
 
 ## Architektur
 
