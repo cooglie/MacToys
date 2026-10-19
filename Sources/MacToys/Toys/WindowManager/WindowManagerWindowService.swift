@@ -83,11 +83,11 @@ final class WindowManagerWindowService {
         guard AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &ref) == .success,
               let windows = ref as? [AXUIElement] else { return nil }
 
-        // 1) Direkt über _AXWindowID (nicht öffentlich, oft verfügbar).
+        // 1) Direkt über _AXWindowID (private, aber zuverlässig verfügbar).
         for win in windows {
             var idVal: CFTypeRef?
-            if AXUIElementCopyAttributeValue(win, "AXWindowId" as CFString, &idVal) == .success,
-               let idNum = idVal as? NSNumber, idVal != nil {
+            if AXUIElementCopyAttributeValue(win, "_AXWindowID" as CFString, &idVal) == .success,
+               let idNum = idVal as? NSNumber {
                 if idNum.uint32Value == wid { return win }
             }
         }

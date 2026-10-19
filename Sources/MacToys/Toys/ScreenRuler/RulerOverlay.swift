@@ -80,7 +80,7 @@ private final class RulerView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         NSColor(white: 0, alpha: 0.25).setFill()
-        dirtyRect.fill()
+        bounds.fill()
         guard let s = start, let c = current else { return }
         let r = NSRect(x: min(s.x, c.x), y: min(s.y, c.y),
                        width: abs(c.x - s.x), height: abs(c.y - s.y))

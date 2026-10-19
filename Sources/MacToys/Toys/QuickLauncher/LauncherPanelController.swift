@@ -111,14 +111,23 @@ final class LauncherViewModel: ObservableObject {
     // MARK: - Berechnung
 
     private func evaluate(_ expr: String) -> String? {
-        // Nur rechnen, wenn Math-zeichen vorkommen.
-        let mathChars = CharacterSet(charactersIn: "+-*/().%^")
-        guard expr.unicodeScalars.contains(where: { mathChars.contains($0) }) || expr == expr else { return nil }
+        // Nur rechnen, wenn der Ausdruck ausschließlich Math-Zeichen enthält
+        // (Ziffern, Operatoren, Klammern, Punkt, Komma). Alles andere würde
+        // NSExpression interpretieren (z. B. Funktionsnamen) oder crashen.
+        let allowed = CharacterSet(charactersIn: "0123456789+-*/().%^,.")
+        guard !expr.isEmpty,
+              expr.unicodeScalars.allSatisfy({ allowed.contains($0) }) else { return nil }
+        // Mindestens ein Operator muss vorkommen, sonst ist es nur eine Zahl.
+        let operators = CharacterSet(charactersIn: "+-*/%^")
+        guard expr.unicodeScalars.contains(where: { operators.contains($0) }) else { return nil }
+
         let cleaned = expr.replacingOccurrences(of: "^", with: "**")
             .replacingOccurrences(of: ",", with: ".")
-        // Sehr einfacher NSExpression-Auswerter.
+        // NSExpression ist kein failable Initializer — bei ungültiger Syntax
+        // wirft es zur Laufzeit. Wir fangen das Ergebnis sicher ab.
         let fmt = NSExpression(format: cleaned)
-        guard let val = fmt.expressionValue(with: nil, context: nil) as? Double else { return nil }
+        guard let val = fmt.expressionValue(with: nil, context: nil) as? Double,
+              !val.isNaN, !val.isInfinite else { return nil }
         if val.truncatingRemainder(dividingBy: 1) == 0 {
             return String(Int(val))
         }

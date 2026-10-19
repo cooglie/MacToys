@@ -94,7 +94,7 @@ private final class SelectionView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         NSColor(white: 0, alpha: 0.3).setFill()
-        dirtyRect.fill()
+        bounds.fill()
         if let s = start, let c = current {
             let r = NSRect(x: min(s.x, c.x), y: min(s.y, c.y),
                            width: abs(c.x - s.x), height: abs(c.y - s.y))

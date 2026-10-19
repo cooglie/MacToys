@@ -97,7 +97,15 @@ final class PowerRenameToy: ObservableObject, Toy {
 
     // MARK: - Ausführen
 
-    func execute() -> (renamed: Int, failed: Int) {
+    @Published var result: String = ""
+
+    /// Protokoll-Hauptaktion: öffnet das Fenster (UI-Toy).
+    @MainActor func execute() {
+        ToyRegistry.shared.requestOpenSettings(for: descriptor.id)
+    }
+
+    /// Führt die Umbenennung durch und setzt die Ergebnis-Anzeige.
+    func performRename() {
         let fm = FileManager.default
         var renamed = 0, failed = 0
         let pv = preview
@@ -111,8 +119,8 @@ final class PowerRenameToy: ObservableObject, Toy {
                 MacToysLog.warning("Rename fehlgeschlagen: \(url.lastPathComponent) → \(error)", category: "rename")
             }
         }
+        result = "Fertig: \(renamed) umbenannt, \(failed) fehlgeschlagen."
         files = []
-        return (renamed, failed)
     }
 
     @MainActor
@@ -122,7 +130,6 @@ final class PowerRenameToy: ObservableObject, Toy {
 struct PowerRenameView: View {
     @ObservedObject var toy: PowerRenameToy
     @State private var dropActive = false
-    @State private var result: String?
 
     var body: some View {
         Form {
@@ -171,7 +178,11 @@ struct PowerRenameView: View {
                     .frame(maxHeight: 180)
                 }
             }
-            if let result { Section { Text(result).foregroundStyle(.secondary) } }
+            Section {
+                Button("Umbenennen") { toy.performRename() }
+                    .disabled(toy.files.isEmpty || toy.preview.contains { $0.conflict })
+                if !toy.result.isEmpty { Text(toy.result).foregroundStyle(.secondary) }
+            }
         }
     }
 }
