@@ -53,6 +53,12 @@ protocol Toy: AnyObject {
     /// Stoppt das Werkzeug. Wird beim Deaktivieren oder App-Ende aufgerufen.
     func stop()
 
+    /// Führt die Hauptaktion des Werkzeugs aus (z. B. Messung starten, Farbe
+    /// abtasten, Fenster pinnen). Wird beim Klick im Menüleisten-Menü aufgerufen.
+    /// Aktionsbasierte Werkzeuge überschreiben dies; der Standard öffnet die
+    /// Einstellungs-View des Werkzeugs.
+    @MainActor func execute()
+
     /// SwiftUI-View für die Eigenen Einstellungen dieses Werkzeugs.
     @MainActor func settingsView() -> AnyView
 }
@@ -60,6 +66,12 @@ protocol Toy: AnyObject {
 extension Toy {
     var status: ToyStatus { isRunning ? .on : .off }
     var isRunning: Bool { false }
+
+    /// Standard: Einstellungs-Fenster des Werkzeugs öffnen.
+    @MainActor func execute() {
+        ToyRegistry.shared.requestOpenSettings(for: descriptor.id)
+    }
+
     @MainActor func settingsView() -> AnyView {
         AnyView(EmptyView())
     }

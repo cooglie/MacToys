@@ -48,6 +48,12 @@ final class ColorPickerToy: ObservableObject, Toy {
 
     // MARK: - Pick
 
+    /// Hauptaktion: aktiviert bei Bedarf und tastet eine Farbe ab.
+    @MainActor func execute() {
+        if !isRunning { ToyRegistry.shared.setEnabled(descriptor.id, true) }
+        pick()
+    }
+
     func pick() {
         guard isRunning else { return }
         let sampler = NSColorSampler()

@@ -79,6 +79,7 @@ struct ToyCard: View {
 /// Sheet-Wrapper für die Eigenen Einstellungen eines Toys.
 struct ToySettingsSheet: View {
     let toy: any Toy
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(spacing: 0) {
@@ -86,6 +87,12 @@ struct ToySettingsSheet: View {
                 Text("\(toy.descriptor.name) — Einstellungen")
                     .font(.headline)
                 Spacer()
+                Button("Fertig") {
+                    dismiss()
+                    // Standalone-Fenster (via NSWindow): ebenfalls schließen.
+                    NSApp.keyWindow?.close()
+                }
+                .keyboardShortcut(.cancelAction)
             }
             .padding()
             Divider()
@@ -93,6 +100,6 @@ struct ToySettingsSheet: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding()
         }
-        .frame(minWidth: 420, minHeight: 300)
+        .frame(minWidth: 560, minHeight: 460)
     }
 }

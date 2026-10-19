@@ -27,6 +27,11 @@ final class AwakeToy: ObservableObject, Toy {
 
     // MARK: - Toy Lifecycle
 
+    /// Hauptaktion: schaltet Awake an bzw. aus.
+    @MainActor func execute() {
+        if isRunning { ToyRegistry.shared.setEnabled(descriptor.id, false) } else { ToyRegistry.shared.setEnabled(descriptor.id, true) }
+    }
+
     func start() {
         guard !isRunning else { return }
         let reason: CFString = "MacToys — Awake hält den Mac wach." as CFString

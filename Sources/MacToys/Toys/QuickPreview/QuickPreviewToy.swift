@@ -34,6 +34,18 @@ final class QuickPreviewToy: ObservableObject, Toy {
         isRunning = false
     }
 
+    /// Hauptaktion: aktiviert bei Bedarf und zeigt einen Datei-Auswahl-Dialog,
+    /// dessen Auswahl sofort per Quick Look vorgeschaut wird.
+    @MainActor func execute() {
+        if !isRunning { ToyRegistry.shared.setEnabled(descriptor.id, true) }
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        if panel.runModal() == .OK, let url = panel.url {
+            preview(url)
+        }
+    }
+
     func preview(_ url: URL) {
         previewURL = url
         showQuickLook(url)

@@ -46,6 +46,12 @@ final class QuickLauncherToy: ObservableObject, Toy {
         isRunning = false
     }
 
+    /// Hauptaktion: aktiviert bei Bedarf und zeigt die Launcher-Palette.
+    @MainActor func execute() {
+        if !isRunning { ToyRegistry.shared.setEnabled(descriptor.id, true) }
+        togglePalette()
+    }
+
     @MainActor
     private func togglePalette() {
         if panelController?.isVisible == true {

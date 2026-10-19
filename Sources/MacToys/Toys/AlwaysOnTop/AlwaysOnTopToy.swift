@@ -67,6 +67,12 @@ final class AlwaysOnTopToy: ObservableObject, Toy {
 
     // MARK: - Pinnen
 
+    /// Hauptaktion: aktiviert bei Bedarf und toggelt das fokussierte Fenster.
+    @MainActor func execute() {
+        if !isRunning { ToyRegistry.shared.setEnabled(descriptor.id, true) }
+        togglePinned()
+    }
+
     /// Toggelt den Pin-Status des fokussierten Fensters.
     func togglePinned() {
         guard isRunning else { return }

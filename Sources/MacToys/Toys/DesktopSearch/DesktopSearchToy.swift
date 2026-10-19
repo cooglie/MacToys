@@ -57,6 +57,11 @@ final class DesktopSearchToy: ObservableObject, Toy {
         isRunning = false
     }
 
+    /// Hauptaktion: öffnet das Suchfenster des Werkzeugs.
+    @MainActor func execute() {
+        ToyRegistry.shared.requestOpenSettings(for: descriptor.id)
+    }
+
     func runSearch() {
         mdQuery?.stop()
         results = []

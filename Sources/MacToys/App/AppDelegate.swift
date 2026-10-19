@@ -27,6 +27,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Aktiviert markierte Toys live starten.
         registry.startEnabled()
 
+        // Öffnen-Anfragen aus Toys (Standard-execute) empfangen.
+        AppEvents.shared.openSettingsRequests
+            .receive(on: RunLoop.main)
+            .sink { [weak self] id in self?.showToySettings(id: id) }
+            .store(in: &bag)
+
         // Dashboard beim ersten Start einmal zeigen, damit der Nutzer es findet.
         if settings.showDashboardAtLaunch {
             showDashboard()
@@ -66,10 +72,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "MacToys Dashboard", action: #selector(showDashboard), keyEquivalent: "")
         menu.addItem(.separator())
 
-        // Schnellzugriff auf jedes Toy (an/aus).
-        let header = NSMenuItem(title: "Werkzeuge", action: nil, keyEquivalent: "")
+        // Schnellzugriff auf jedes Toy — Klick führt die Hauptaktion aus.
+        let header = NSMenuItem(title: "Werkzeuge (Klick = ausführen)", action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(header)
+        for toy in registry.toys {
+            let id = toy.descriptor.id
+            let on = registry.enabled[id] ?? false
+            let item = NSMenuItem(title: "\(toy.descriptor.name)",
+                                  action: #selector(executeToy(_:)),
+                                  keyEquivalent: "")
+            item.representedObject = id
+            item.state = on ? .on : .off
+            item.target = self
+            menu.addItem(item)
+        }
+
+        menu.addItem(.separator())
+
+        // An/Aus-Übersicht: jedes Toy per Häkchen schalten.
+        let toggleHeader = NSMenuItem(title: "Aktivieren / Deaktivieren", action: nil, keyEquivalent: "")
+        toggleHeader.isEnabled = false
+        menu.addItem(toggleHeader)
         for toy in registry.toys {
             let id = toy.descriptor.id
             let on = registry.enabled[id] ?? false
@@ -95,6 +119,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func toggleToy(_ sender: NSMenuItem) {
         guard let id = sender.representedObject as? String else { return }
         registry.toggle(id)
+    }
+
+    /// Klick auf ein Werkzeug im Menü: führt dessen Hauptaktion aus.
+    @objc private func executeToy(_ sender: NSMenuItem) {
+        guard let id = sender.representedObject as? String,
+              let toy = registry.toy(id: id) else { return }
+        Task { @MainActor in toy.execute() }
     }
 
     // MARK: - Dashboard / Fenster
@@ -142,5 +173,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func quitApp() {
         NSApp.terminate(nil)
+    }
+
+    // MARK: - Werkzeug-Einstellungen (für Standard-execute)
+
+    /// Öffnet das Einstellungs-Fenster eines einzelnen Werkzeugs (für UI-Toys,
+    /// deren Hauptaktion das Fenster selbst ist, z. B. Power Rename).
+    @MainActor private func showToySettings(id: String) {
+        guard let toy = registry.toy(id: id) else { return }
+        let view = ToySettingsSheet(toy: toy)
+            .environmentObject(registry)
+            .environmentObject(settings)
+        let hosting = NSHostingController(rootView: view)
+        let window = NSWindow(contentViewController: hosting)
+        window.title = "\(toy.descriptor.name) — MacToys"
+        window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
+        window.setFrameAutosaveName("mactoys.toy.\(id)")
+        window.setContentSize(NSSize(width: 620, height: 520))
+        window.center()
+        NSWindowController(window: window).showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 }

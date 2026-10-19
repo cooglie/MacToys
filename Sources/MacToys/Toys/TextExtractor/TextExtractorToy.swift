@@ -46,6 +46,12 @@ final class TextExtractorToy: ObservableObject, Toy {
 
     // MARK: - Capture + OCR
 
+    /// Hauptaktion: aktiviert bei Bedarf und startet die OCR-Auswahl.
+    @MainActor func execute() {
+        if !isRunning { ToyRegistry.shared.setEnabled(descriptor.id, true) }
+        captureAndRecognize()
+    }
+
     func captureAndRecognize() {
         guard isRunning else { return }
         guard let rect = selectRegion() else { return }

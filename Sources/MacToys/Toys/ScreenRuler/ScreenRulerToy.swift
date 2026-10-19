@@ -42,6 +42,12 @@ final class ScreenRulerToy: ObservableObject, Toy {
         isRunning = false
     }
 
+    /// Hauptaktion: aktiviert das Werkzeug bei Bedarf und startet die Messung.
+    @MainActor func execute() {
+        if !isRunning { ToyRegistry.shared.setEnabled(descriptor.id, true) }
+        measure()
+    }
+
     func measure() {
         guard isRunning else { return }
         let overlay = RulerOverlay()

@@ -88,6 +88,12 @@ final class ToyRegistry: ObservableObject {
         toys.first { $0.descriptor.id == id }
     }
 
+    /// Wird vom Standard-`execute()` gerufen, um das Einstellungs-Fenster eines
+    /// reinen UI-Werkzeugs zu öffnen (z. B. Power Rename, Image Resizer).
+    @MainActor func requestOpenSettings(for id: String) {
+        AppEvents.shared.openSettingsRequests.send(id)
+    }
+
     /// Startet alle als aktiv markierten Toys (beim App-Start).
     func startEnabled() {
         for toy in toys where enabled[toy.descriptor.id] ?? false {
