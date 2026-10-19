@@ -1,0 +1,16 @@
+# Build-Produkte
+.build/
+build/
+*.xcodeproj/xcuserdata/
+DerivedData/
+
+# App-Bundles (werden vom build.sh erzeugt)
+*.app
+
+# macOS
+.DS_Store
+*.swp
+
+# Icon-Zwischenschritte
+Resources/icon.iconset/
+Resources/icon-source.png
