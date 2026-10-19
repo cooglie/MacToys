@@ -26,7 +26,6 @@ struct SettingsView: View {
 
             Section("Über") {
                 row("Version", "0.1")
-                row("Lizenz", "MIT")
                 row("Architektur", "Universal (arm64 + x86_64)")
             }
         }

@@ -3,7 +3,6 @@
 > **More power to your Mac.** Free forever. Open source by design.
 
 [![Release](https://img.shields.io/github/v/release/cooglie/MacToys?label=Release)](https://github.com/cooglie/MacToys/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/cooglie/MacToys/blob/main/LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2012%2B-blue)](https://github.com/cooglie/MacToys)
 [![Architecture](https://img.shields.io/badge/Arch-Universal%20%28arm64%20%2B%20x86__64%29-green)](https://github.com/cooglie/MacToys)
 
@@ -139,10 +138,6 @@ Contributions sind willkommen! Siehe [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - 🐛 **Bug melden:** [Issues](https://github.com/cooglie/MacToys/issues)
 - 💡 **Feature vorschlagen:** [Issues](https://github.com/cooglie/MacToys/issues)
 - 🔧 **Code beisteuern:** [Pull Requests](https://github.com/cooglie/MacToys/pulls)
-
-## 📄 Lizenz
-
-MIT — siehe [LICENSE](LICENSE).
 
 ---
 

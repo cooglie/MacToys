@@ -5,7 +5,7 @@ Danke, dass du MacToys mitgestalten möchtest! 🙌
 ## Grundregeln
 
 - **Kostenlos & offen** — keine bezahlten Features, keine Locks. Jeder Beitrag
-  bleibt unter der MIT-Lizenz.
+  bleibt frei und quelloffen.
 - **Nativ** — Swift/SwiftUI, macOS-First. Keine Embed- oder Web-Wrapper.
 - **Lokal & privat** — keine Pflichtkonten, kein Telemetry, keine Cloud-Aufrufe
   wo lokale APIs genügen.
@@ -34,7 +34,3 @@ Stelle sicher, dass der Build ohne Warnungen durchläuft.
 - Konventional-Commits (`feat:`, `fix:`, `docs:`, `refactor:` …).
 - Kleine, fokussierte Pull Requests.
 - Beschreibe *warum*, nicht nur *was*.
-
-## Lizenz
-
-Mit deinem Beitrag akzeptierst du die MIT-Lizenz des Projekts.

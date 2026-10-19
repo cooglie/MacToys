@@ -56,7 +56,7 @@ struct DashboardView: View {
                 .font(.caption)
                 .foregroundStyle(.tertiary)
             Spacer()
-            Text("Free forever · Open source · MIT")
+            Text("Free forever · Open source")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
