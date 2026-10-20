@@ -71,8 +71,10 @@ final class QuickLauncherSettings: ObservableObject {
     @Published var hotkey: HotkeyConfig { didSet { save() } }
     private let key = "mactoys.launcher.config"
     private init() {
-        let cmd = UInt32(cmdKey), sp = UInt32(kVK_Space)
-        hotkey = HotkeyConfig(keyCode: sp, modifiers: cmd, label: "⌘Space")
+        // ⌘Space ist von Spotlight reserviert — RegisterEventHotKey schlägt
+        // dort fehl. Daher ⌘⇧Space als Konflikt-freien Default wählen.
+        let mods = UInt32(cmdKey | shiftKey), sp = UInt32(kVK_Space)
+        hotkey = HotkeyConfig(keyCode: sp, modifiers: mods, label: "⌘⇧Space")
         if let data = UserDefaults.standard.data(forKey: key),
            let d = try? JSONDecoder().decode(HotkeyConfig.self, from: data) { hotkey = d }
     }

@@ -36,9 +36,9 @@ final class DesktopSearchToy: ObservableObject, Toy {
             case .documents: return "Dokumente"; case .archives: return "Archive"; case .code: return "Code"
             }
         }
-        var predicate: String {
+        var predicate: String? {
             switch self {
-            case .all: return "kMDItemFSName == '*'"
+            case .all: return nil   // kein Typ-Filter: alles finden
             case .apps: return "kMDItemContentType == 'com.apple.application-bundle'"
             case .images: return "kMDItemContentTypeTree == 'public.image'"
             case .documents: return "kMDItemContentTypeTree == 'public.text'"
@@ -52,7 +52,11 @@ final class DesktopSearchToy: ObservableObject, Toy {
 
     func start() { isRunning = true }
     func stop() {
-        mdQuery?.stop()
+        if let q = mdQuery {
+            NotificationCenter.default.removeObserver(self, name: .NSMetadataQueryDidFinishGathering, object: q)
+            NotificationCenter.default.removeObserver(self, name: .NSMetadataQueryDidUpdate, object: q)
+            q.stop()
+        }
         mdQuery = nil
         isRunning = false
     }
@@ -63,14 +67,32 @@ final class DesktopSearchToy: ObservableObject, Toy {
     }
 
     func runSearch() {
-        mdQuery?.stop()
+        // alte Query inkl. Observer sauber abbauen
+        if let old = mdQuery {
+            NotificationCenter.default.removeObserver(self, name: .NSMetadataQueryDidFinishGathering, object: old)
+            NotificationCenter.default.removeObserver(self, name: .NSMetadataQueryDidUpdate, object: old)
+            old.stop()
+            mdQuery = nil
+        }
         results = []
-        guard !query.isEmpty else { return }
+        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
+            searching = false
+            return
+        }
         searching = true
 
         let q = NSMetadataQuery()
         q.searchScopes = [NSMetadataQueryUserHomeScope]
-        q.predicate = NSPredicate(format: "(kMDItemDisplayName LIKE[cd] %@) AND (\(typeFilter.predicate))", "*\(query)*")
+
+        // Predicate bauen. 'LIKE[cd]' behandelt * als Wildcard (case/diacritic-insensitive).
+        let namePart = NSPredicate(format: "kMDItemDisplayName LIKE[cd] %@", "*\(query)*")
+        if let typePred = typeFilter.predicate {
+            q.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                namePart, NSPredicate(format: typePred)
+            ])
+        } else {
+            q.predicate = namePart
+        }
         q.sortDescriptors = [NSSortDescriptor(key: "kMDItemFSContentChangeDate", ascending: false)]
         q.valueListAttributes = [NSMetadataItemURLKey]
 
@@ -93,8 +115,11 @@ final class DesktopSearchToy: ObservableObject, Toy {
             res.append(SearchResult(name: name, path: path, url: url, kind: kind))
         }
         q.enableUpdates()
-        results = res
-        searching = false
+        // UI-Updates immer main-thread-gebunden.
+        DispatchQueue.main.async { [weak self] in
+            self?.results = res
+            self?.searching = false
+        }
     }
 
     @MainActor

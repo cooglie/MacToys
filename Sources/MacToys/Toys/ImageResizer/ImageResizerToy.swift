@@ -85,6 +85,11 @@ final class ImageResizerToy: ObservableObject, Toy {
                                   bytesPerRow: 0, space: cs,
                                   bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
         ctx.interpolationQuality = .high
+        // Bitmap-Kontext hat Bottom-Left-Ursprung (y↑). Ohne Flip würde das
+        // Bild kopfstehend gerendert. CTM vertikal spiegeln, damit das Bild
+        // aufrecht steht.
+        ctx.translateBy(x: 0, y: CGFloat(newH))
+        ctx.scaleBy(x: 1, y: -1)
         ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: newW, height: newH))
         guard let out = ctx.makeImage() else { return false }
 
@@ -188,9 +193,23 @@ struct ImageDropArea: View {
         }
         .frame(height: 64)
         .onDrop(of: [.fileURL], isTargeted: $active) { providers in
-            let urls = providers.compactMap { try? $0.loadItem(forTypeIdentifier: "public.file-url") as? Data }
-                .compactMap { URL(dataRepresentation: $0, relativeTo: nil) }
-            toy.files.append(contentsOf: urls)
+            var urls: [URL] = []
+            let g = DispatchGroup()
+            for p in providers {
+                g.enter()
+                p.loadItem(forTypeIdentifier: "public.file-url") { item, _ in
+                    defer { g.leave() }
+                    if let data = item as? Data,
+                       let u = URL(dataRepresentation: data, relativeTo: nil) {
+                        urls.append(u)
+                    } else if let u = item as? URL {
+                        urls.append(u)
+                    } else if let s = item as? String, let u = URL(string: s) {
+                        urls.append(u)
+                    }
+                }
+            }
+            g.notify(queue: .main) { toy.files.append(contentsOf: urls) }
             return true
         }
         .onTapGesture {

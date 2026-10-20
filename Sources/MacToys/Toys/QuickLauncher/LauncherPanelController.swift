@@ -37,6 +37,10 @@ final class LauncherPanelController {
         panel.titleVisibility = .hidden
         panel.level = .floating
         panel.isOpaque = false
+        // Wichtig für Tastaturfokus im borderless Panel: NSPanel setzt
+        // becomesKeyOnlyIfNeeded standardmäßig auf true, was das TextField
+        // am Fokus hindert.
+        panel.becomesKeyOnlyIfNeeded = false
         panel.backgroundColor = NSColor.windowBackgroundColor
         panel.hidesOnDeactivate = false
         panel.collectionBehavior = [.fullScreenAuxiliary, .canJoinAllSpaces]
@@ -121,10 +125,15 @@ final class LauncherViewModel: ObservableObject {
         let operators = CharacterSet(charactersIn: "+-*/%^")
         guard expr.unicodeScalars.contains(where: { operators.contains($0) }) else { return nil }
 
+        // NSExpression(format:) wirft bei syntaktisch ungültigen Ausdrücken
+        // (z. B. "2++2", "()", "2*") eine NSException, die sich in Swift nicht
+        // per do/catch abfangen lässt → App-Crash. Daher vorab syntaktisch
+        // validieren: Klammern balanciert, kein Operator am Ende, keine zwei
+        // Operatoren (außer Vorzeichen) direkt nacheinander.
+        guard isSyntacticallyValid(expr) else { return nil }
+
         let cleaned = expr.replacingOccurrences(of: "^", with: "**")
             .replacingOccurrences(of: ",", with: ".")
-        // NSExpression ist kein failable Initializer — bei ungültiger Syntax
-        // wirft es zur Laufzeit. Wir fangen das Ergebnis sicher ab.
         let fmt = NSExpression(format: cleaned)
         guard let val = fmt.expressionValue(with: nil, context: nil) as? Double,
               !val.isNaN, !val.isInfinite else { return nil }
@@ -132,6 +141,34 @@ final class LauncherViewModel: ObservableObject {
             return String(Int(val))
         }
         return String(format: "%g", val)
+    }
+
+    /// Grob-Syntaxprüfung, damit NSExpression(format:) nicht crasht.
+    private func isSyntacticallyValid(_ expr: String) -> Bool {
+        var depth = 0
+        var prev: Character = " "
+        let ops = Set<Character>(["+", "-", "*", "/", "%", "^"])
+        for ch in expr {
+            if ch == "(" {
+                depth += 1
+                // '(' darf nicht direkt auf Operator folgen außer Vorzeichen.
+                if prev != " " && ops.contains(prev) == false && prev != "(" {
+                    return false
+                }
+            } else if ch == ")" {
+                depth -= 1
+                if depth < 0 { return false }            // mehr ')' als '('
+                if ops.contains(prev) { return false }   // Operator direkt vor ')'
+            } else if ops.contains(ch) {
+                // Operator (außer führendes Vorzeichen) darf nicht auf anderen
+                // Operator folgen — außer '*','/','%' nach '+'/'-' als Vorzeichen.
+                if ch != "-" && ch != "+" && ops.contains(prev) { return false }
+            }
+            prev = ch
+        }
+        if depth != 0 { return false }                  // unausgewogene Klammern
+        if ops.contains(prev) { return false }          // Operator am Ende
+        return true
     }
 
     // MARK: - Apps
@@ -188,6 +225,7 @@ struct LauncherItem: Identifiable, Hashable {
 struct LauncherView: View {
     @ObservedObject var viewModel: LauncherViewModel
     let onClose: () -> Void
+    @FocusState private var queryFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -196,6 +234,7 @@ struct LauncherView: View {
                 TextField("Suchen, rechnen, starten…", text: $viewModel.query)
                     .textFieldStyle(.plain)
                     .font(.title3)
+                    .focused($queryFocused)
                     .onChange(of: viewModel.query) { _ in viewModel.update() }
                     .onSubmit { submit() }
                 Button(action: onClose) { Image(systemName: "xmark.circle.fill") }
@@ -216,6 +255,9 @@ struct LauncherView: View {
             }
         }
         .background(Color(nsColor: .windowBackgroundColor))
+        .onAppear { queryFocused = true }
+        // Fokus wiederherstellen, wenn das Panel per Hotkey erneut gezeigt wird.
+        .onChange(of: viewModel.query) { _ in if !queryFocused { queryFocused = true } }
     }
 
     private func submit() {
