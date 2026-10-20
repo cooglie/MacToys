@@ -54,10 +54,15 @@ final class QuickLauncherToy: ObservableObject, Toy {
 
     @MainActor
     private func togglePalette() {
+        // Controller persistent halten statt bei jedem Toggle neu zu erzeugen.
+        // So bleiben zukünftig Zustand/Recents erhalten und das Panel ist
+        // schneller wieder sichtbar.
         if panelController?.isVisible == true {
             panelController?.close()
         } else {
-            panelController = LauncherPanelController()
+            if panelController == nil {
+                panelController = LauncherPanelController()
+            }
             panelController?.show()
         }
     }
@@ -93,10 +98,14 @@ struct QuickLauncherSettingsView: View {
                 }
             }
             Section("Funktionen") {
-                Label("Apps starten", systemImage: "app")
+                Label("Apps starten (mit Recents-Ranking)", systemImage: "app")
                 Label("Taschenrechner (z. B. 12*9+3)", systemImage: "equals")
-                Label("Dateien öffnen", systemImage: "doc")
                 Label("Web-Suche (prefix: g <suche>)", systemImage: "magnifyingglass")
+            }
+            Section("Bedienung") {
+                Label("↑↓ — Auswahl bewegen", systemImage: "arrow.up.arrow.down")
+                Label("↵ — Ausgewähltes öffnen", systemImage: "return")
+                Label("esc — Palette schließen", systemImage: "escape")
             }
             Section("Tipp") {
                 Text("Tippe einen Ausdruck wie 2+2 für Berechnung, einen App-Namen zum Starten, oder 'g katzen' für eine Google-Suche.")
