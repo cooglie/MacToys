@@ -73,10 +73,14 @@ final class ImageResizerToy: ObservableObject, Toy {
 
     private func process(_ url: URL) -> Bool {
         guard let src = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let props = CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [CFString: Any],
-              let w = props[kCGImagePropertyPixelWidth] as? Int,
-              let h = props[kCGImagePropertyPixelHeight] as? Int,
               let cgImage = CGImageSourceCreateImageAtIndex(src, 0, nil) else { return false }
+
+        // Bildabmessungen direkt vom dekodierten CGImage nehmen. ImageIO liefert
+        // die Properties (kCGImagePropertyPixelWidth/Height) als NSNumber/CFNumber,
+        // nicht als Int — ein 'as? Int'-Cast schlägt dort still fehl und ließ
+        // process() für jedes Bild sofort abbrechen (0 verarbeitet).
+        let w = cgImage.width
+        let h = cgImage.height
 
         let (newW, newH) = computeTarget(width: w, height: h)
 
